@@ -1,0 +1,17 @@
+version: '3.8' # Specify the Docker Compose version
+
+services:
+  app: # Define the service (container) for the React app
+    build: . # Build the container using the Dockerfile in the current directory
+
+    ports:
+      - '5173:5173' # Map the container's port 5173 (Vite) to the host machine's port 5173
+
+    volumes:
+      - .:/app # Mount the entire project directory for hot reloading
+      - /app/node_modules # Prevent overwriting container-installed dependencies
+
+    environment:
+      - NODE_ENV=development # Set the environment variable for development mode
+
+    command: npm run dev -- --host # Run the Vite dev server and make it accessible externally
