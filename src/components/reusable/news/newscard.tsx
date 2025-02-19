@@ -8,77 +8,68 @@ type ArticleNews = {
 
 const NewsCard: React.FC<ArticleNews> = ({ article }) => {
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 h-full border border-gray-100">
-      {/* Image Container with Gradient Overlay */}
-
-      <div className="relative h-56 w-full overflow-hidden group">
+    <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-blue-100 transition-all duration-300 h-full shadow-sm hover:shadow-xl">
+      <div className="relative h-64 w-full overflow-hidden">
         <img
           src={article.imageUrl || ''}
           alt={article.title}
-          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-in-out"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
 
-        {/* Category Badge */}
         {article.category && (
           <div className="absolute top-4 right-4">
-            <span className="bg-blue-600/90 backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-sm font-medium">
+            <span className="bg-blue-500/95 backdrop-blur text-white px-4 py-2 rounded-full text-sm font-semibold tracking-wide shadow-lg">
               {article.category}
             </span>
           </div>
         )}
 
-        {/* Source Badge */}
         {article.source && article.sourceUrl && (
           <div className="absolute bottom-4 left-4">
             <a
               href={article.sourceUrl}
-              className="flex items-center gap-2 bg-white/90 backdrop-blur-sm text-gray-800 px-3 py-1.5 rounded-full text-sm font-medium hover:bg-white transition-colors"
+              className="flex items-center gap-2 bg-white/95 backdrop-blur text-gray-800 px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-50 transition-all duration-300 shadow-lg"
             >
-              <Link size={14} />
+              <Link size={14} className="text-blue-500" />
               {article.source}
             </a>
           </div>
         )}
       </div>
 
-      {/* Content Container */}
-      <div className="p-6">
-        {/* Title */}
+      <div className="p-8">
         {article.title && (
-          <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 hover:text-blue-600 transition-colors cursor-pointer">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4 line-clamp-2 group-hover:text-blue-600 transition-colors">
             {article.title}
           </h2>
         )}
 
-        {/* Meta Information */}
-        <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-600">
+        <div className="flex flex-wrap gap-6 mb-6 text-sm text-gray-600">
           {article.author && (
-            <div className="flex items-center gap-2 hover:text-blue-600 transition-colors cursor-pointer">
-              <User size={16} className="text-gray-400" />
-              <span>{article.author}</span>
+            <div className="flex items-center gap-2 hover:text-blue-500 transition-colors">
+              <User size={16} className="text-blue-400" />
+              <span className="font-medium">{article.author}</span>
             </div>
           )}
           {article.date && (
             <div className="flex items-center gap-2">
-              <Calendar size={16} className="text-gray-400" />
-              <span>{article.date}</span>
+              <Calendar size={16} className="text-blue-400" />
+              <span className="font-medium">{article.date}</span>
             </div>
           )}
         </div>
 
-        {/* Description */}
         {article.description && (
-          <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-6">
+          <p className="text-gray-600 text-base leading-relaxed line-clamp-3 mb-8">
             {article.description}
           </p>
         )}
 
-        {/* Read More Button */}
         {article.sourceUrl && (
           <a
             href={article.sourceUrl}
-            className="w-full block text-center bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2.5 rounded-lg transition-all duration-300 text-sm font-medium shadow-sm hover:shadow-md active:scale-98"
+            className="w-full block text-center bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3 rounded-xl transition-all duration-300 text-sm font-semibold tracking-wide shadow-md hover:shadow-lg active:scale-98"
           >
             Read Full Article
           </a>

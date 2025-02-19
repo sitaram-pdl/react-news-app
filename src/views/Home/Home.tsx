@@ -1,9 +1,15 @@
-import { fetchNewsApiData } from '@/api';
+import { fetchGuardianApiData, fetchNewsApiData, fetchNYTApiData } from '@/api';
 import Articles from '@/components/reusable/news/article';
 import { Label } from '@/components/ui/label';
 import { useArticle } from '@/context/article-provider';
-import { normalizeArticlesToNewsCards } from '@/lib/normalizeHelper';
+import useDebounce from '@/hooks/useDebounce';
+import {
+  normalizeArticlesToNewsCards,
+  normalizeDocToArticle,
+  normalizeGuardianArticlesToNewsCards,
+} from '@/lib/normalizeHelper';
 import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import DateRangePicker from '../../components/reusable/date-range-picker';
 import MultiSelect from '../../components/reusable/multiselect';
 import { Typography } from '../../components/reusable/typography';
@@ -28,27 +34,51 @@ const Home = () => {
     sources,
   } = useArticle();
 
+  // Apply debounce to prevent rapid updates
+  const debouncedKeyword = useDebounce(keyword, 500);
+  const debouncedCategory = useDebounce(selectedCategory, 500);
+  const debouncedAuthor = useDebounce(selectedAuthor, 500);
+  const debouncedSources = useDebounce(selectedSources, 500);
+
+  // // Debouncing 'from' and 'to' dates separately
+  // const debouncedFrom = useDebounce(date?.from, 500);
+  // const debouncedTo = useDebounce(date?.to, 500);
+
   const params = {
-    categories,
-    sources,
-    authors,
+    categories: debouncedCategory,
+    sources: debouncedSources,
+    authors: debouncedAuthor,
     page: currentPage,
     pageSize,
-    keyword,
+    keyword: debouncedKeyword,
   };
 
   const newsApiData = useQuery(['getNewsApiArticles', params], () =>
     fetchNewsApiData(params)
   );
 
-  const newApiNormalizeData = normalizeArticlesToNewsCards(
-    newsApiData?.data?.data.articles || []
+  const newApiNormalizeData = useMemo(() => {
+    return normalizeArticlesToNewsCards(newsApiData?.data?.data.articles || []);
+  }, [newsApiData?.data?.data.articles]);
+
+  const guardianApiData = useQuery(['fetchGuardianApiData', params], () =>
+    fetchGuardianApiData(params)
   );
 
-  // useQuery(['fetchGuardianApiData', params], () =>
-  //   fetchGuardianApiData(params)
-  // );
-  // useQuery(['fetchGuardianApiData', params], () => fetchNYTApiData(params));
+  const guardianApiNormalizeData = useMemo(() => {
+    return normalizeGuardianArticlesToNewsCards(
+      guardianApiData.data?.data.response.results || []
+    );
+  }, [guardianApiData.data?.data.response.results]);
+
+  const nytApiData = useQuery(['fetchGuardianApiData', params], () =>
+    fetchNYTApiData(params)
+  );
+
+  const nYTApiNormalizeData = useMemo(() => {
+    return normalizeDocToArticle(nytApiData.data?.data.response.docs || []);
+  }, [nytApiData.data?.data.response.docs]);
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
       <Typography variant="h1" className="text-gray-600 font-bold mt-5 mb-20">
@@ -113,7 +143,13 @@ const Home = () => {
         </div>
       </div>
 
-      <Articles news={newApiNormalizeData} />
+      <Articles
+        news={[
+          ...nYTApiNormalizeData,
+          ...guardianApiNormalizeData,
+          ...newApiNormalizeData,
+        ]}
+      />
     </div>
   );
 };

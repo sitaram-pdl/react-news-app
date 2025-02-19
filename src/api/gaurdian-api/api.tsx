@@ -21,20 +21,27 @@ export const fetchGuardianApiData = async ({
   pageSize = 30,
   orderBy = 'newest',
 }: FetchGuardianNewsParams): Promise<AxiosResponse<GetGuardianApiResponse> | null> => {
-  const queryParam = keyword ? `&q=${keyword}` : '';
-  const pageParam = `&page=${page}`;
-  const pageSizeParam = `&page-size=${pageSize}`;
-  const orderByParam = `&order-by=${orderBy}`;
-  const fromParam = from ? `&from-date=${from}` : '';
-  const toParam = to ? `&to-date=${to}` : '';
+  // Build query parameters dynamically based on function arguments
+  const queryParams: string[] = [];
 
-  const url = `${BASE_URL}/search?api-key=${API_KEY}${queryParam}${pageParam}${pageSizeParam}${orderByParam}${fromParam}${toParam}&show-fields=thumbnail,trailText,byline`;
+  if (keyword) queryParams.push(`q=${encodeURIComponent(keyword)}`);
+  if (from) queryParams.push(`from-date=${from}`);
+  if (to) queryParams.push(`to-date=${to}`);
+  if (orderBy) queryParams.push(`order-by=${orderBy}`);
+
+  queryParams.push(`page=${page}`);
+  queryParams.push(`page-size=${pageSize}`);
+
+  // Ensure the parameters are joined properly
+  const queryString = queryParams.length > 0 ? `&${queryParams.join('&')}` : '';
+
+  const url = `${BASE_URL}/search?api-key=${API_KEY}${queryString}&show-fields=thumbnail,trailText,byline`;
 
   try {
     const response = await axios.get(url);
     return response;
   } catch (error) {
-    console.error('Error fetching Guardian news:', error);
+    console.error('Error fetching Guardian news:');
     return null;
   }
 };

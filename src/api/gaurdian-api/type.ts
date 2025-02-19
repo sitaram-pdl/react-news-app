@@ -16,6 +16,11 @@ export interface GuardianArticle {
   webTitle: string;
   webUrl: string;
   apiUrl: string;
+  fields: {
+    trailText: string;
+    byline: string;
+    thumbnail: string;
+  };
   isHosted: boolean;
   pillarId: string;
   pillarName: string;
