@@ -1,6 +1,5 @@
 import { fetchGuardianApiData, fetchNewsApiData, fetchNYTApiData } from '@/api';
 import Articles from '@/components/reusable/news/article';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useArticle } from '@/context/article-provider';
 import useDebounce from '@/hooks/useDebounce';
@@ -12,14 +11,17 @@ import {
   normalizeDocToArticle,
   normalizeGuardianArticlesToNewsCards,
 } from '@/lib/normalizeHelper';
-import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { useEffect, useMemo } from 'react';
+import { useInView } from 'react-intersection-observer';
 import DateRangePicker from '../../components/reusable/date-range-picker';
 import MultiSelect from '../../components/reusable/multiselect';
 import { Typography } from '../../components/reusable/typography';
 import { Input } from '../../components/ui/input';
 
 const Home = () => {
+  const { ref, inView } = useInView();
+
   const {
     selectedCategory,
     setSelectedCategory,
@@ -40,7 +42,6 @@ const Home = () => {
   const debouncedCategory = useDebounce(selectedCategory, 500);
   const debouncedAuthor = useDebounce(selectedAuthor, 500);
   const debouncedSources = useDebounce(selectedSources, 500);
-
   const debouncedFrom = useDebounce(date?.from, 500);
   const debouncedTo = useDebounce(date?.to, 500);
 
@@ -54,31 +55,77 @@ const Home = () => {
     date: { from: debouncedFrom, to: debouncedTo },
   };
 
-  const newsApiData = useQuery(['getNewsApiArticles', params], () =>
-    fetchNewsApiData(params)
+  const newsApiData = useInfiniteQuery(
+    [
+      'getNewsApiArticles',
+      debouncedKeyword,
+      debouncedCategory,
+      debouncedAuthor,
+      debouncedSources,
+      debouncedFrom,
+      debouncedTo,
+    ],
+    ({ pageParam = 1 }) => fetchNewsApiData({ ...params, page: pageParam }),
+    {
+      getNextPageParam: (lastPage, pages) => pages.length + 1,
+    }
   );
 
   const newApiNormalizeData = useMemo(() => {
-    return normalizeArticlesToNewsCards(newsApiData?.data?.data.articles || []);
-  }, [newsApiData?.data?.data.articles]);
+    return (
+      newsApiData.data?.pages.flatMap((page) =>
+        normalizeArticlesToNewsCards(page?.data.articles || [])
+      ) || []
+    );
+  }, [newsApiData.data?.pages]);
 
-  const guardianApiData = useQuery(['fetchGuardianApiData', params], () =>
-    fetchGuardianApiData(params)
+  const guardianApiData = useInfiniteQuery(
+    [
+      'fetchGuardianApiData',
+      debouncedKeyword,
+      debouncedCategory,
+      debouncedAuthor,
+      debouncedSources,
+      debouncedFrom,
+      debouncedTo,
+    ],
+    ({ pageParam = 1 }) => fetchGuardianApiData({ ...params, page: pageParam }),
+    {
+      getNextPageParam: (lastPage, pages) => pages.length + 1,
+    }
   );
 
   const guardianApiNormalizeData = useMemo(() => {
-    return normalizeGuardianArticlesToNewsCards(
-      guardianApiData.data?.data.response.results || []
+    return (
+      guardianApiData.data?.pages.flatMap((page) =>
+        normalizeGuardianArticlesToNewsCards(page?.data.response.results || [])
+      ) || []
     );
-  }, [guardianApiData.data?.data.response.results]);
+  }, [guardianApiData.data?.pages]);
 
-  const nytApiData = useQuery(['fetchNYTApiData', params], () =>
-    fetchNYTApiData(params)
+  const nytApiData = useInfiniteQuery(
+    [
+      'fetchNYTApiData',
+      debouncedKeyword,
+      debouncedCategory,
+      debouncedAuthor,
+      debouncedSources,
+      debouncedFrom,
+      debouncedTo,
+    ],
+    ({ pageParam = 1 }) => fetchNYTApiData({ ...params, page: pageParam }),
+    {
+      getNextPageParam: (lastPage, pages) => pages.length + 1,
+    }
   );
 
   const nYTApiNormalizeData = useMemo(() => {
-    return normalizeDocToArticle(nytApiData.data?.data.response.docs || []);
-  }, [nytApiData.data?.data.response.docs]);
+    return (
+      nytApiData.data?.pages.flatMap((page) =>
+        normalizeDocToArticle(page?.data.response.docs || [])
+      ) || []
+    );
+  }, [nytApiData.data?.pages]);
 
   const news = useMemo(
     () => [
@@ -88,9 +135,18 @@ const Home = () => {
     ],
     [nYTApiNormalizeData, guardianApiNormalizeData, newApiNormalizeData]
   );
+
   const uniqueCategories = useMemo(() => extractUniqueCategories(news), [news]);
   const uniqueAuthors = useMemo(() => extractUniqueAuthors(news), [news]);
   const uniqueSources = useMemo(() => extractUniqueSources(news), [news]);
+
+  useEffect(() => {
+    if (inView) {
+      newsApiData.fetchNextPage();
+      guardianApiData.fetchNextPage();
+      nytApiData.fetchNextPage();
+    }
+  }, [inView]);
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -166,12 +222,16 @@ const Home = () => {
       </div>
 
       <Articles news={news} />
-      <Button
-        className="w-full"
-        onClick={() => setCurrentPage((prev) => prev + 1)}
-      >
-        Load more
-      </Button>
+
+      <div ref={ref} className="mt-4">
+        {(newsApiData.isFetchingNextPage ||
+          guardianApiData.isFetchingNextPage ||
+          nytApiData.isFetchingNextPage) && (
+          <div className="flex justify-center py-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
