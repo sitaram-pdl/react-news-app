@@ -18,7 +18,7 @@ interface Source {
   name: string;
 }
 
-interface Article {
+export interface ApiArticle {
   source: Source;
   author: string | null;
   title: string;
@@ -32,15 +32,23 @@ interface Article {
 export interface GetNewsApiResponse {
   status: string;
   totalResults: number;
-  articles: Article[];
+  articles: ApiArticle[];
 }
 
-export interface FetchArticlesParams {
-  q: string; //Keywords or phrases
-  from?: string;
-  to?: string;
-  language?: string;
-  sortBy?: string;
-  pageSize?: number;
+export type FetchArticlesParams = Partial<{
+  q: string; // Keywords or phrases
+  from: string;
+  to: string;
+  language: string;
+  sortBy: string;
+  pageSize: number;
+  page: number;
+}>;
+
+export interface FetchNewsParams {
+  categories?: string[];
+  sources?: string[];
+  author?: string[];
   page?: number;
+  pageSize?: number;
 }

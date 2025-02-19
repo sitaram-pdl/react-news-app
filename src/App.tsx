@@ -1,16 +1,22 @@
-import { Route, Routes } from 'react-router-dom';
-
-import { NAVIGATION_PATHS } from './constants/navigation';
-
 import Home from '@/views/Home/Home';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      refetchOnMount: false,
+      retry: false,
+    },
+  },
+});
 
 function App() {
   return (
-    <>
-      <Routes>
-        <Route index path={NAVIGATION_PATHS.HOME_PATH} element={<Home />} />
-      </Routes>
-    </>
+    <QueryClientProvider client={queryClient}>
+      <Home />
+    </QueryClientProvider>
   );
 }
 

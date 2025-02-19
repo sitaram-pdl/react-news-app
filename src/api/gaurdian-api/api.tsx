@@ -1,31 +1,40 @@
-import { PublicRequest } from '@/lib';
-import { FetchGaurdianArticlesParams, GetGuardianApiResponse } from './type';
+import axios, { AxiosResponse } from 'axios';
+import { GetGuardianApiResponse } from './type';
 
 const BASE_URL = 'https://content.guardianapis.com';
-const API_KEY = 'your_guardian_api_key';
-export const getGuardianArticles = async ({
-  q,
+const API_KEY = '07209d94-b995-408c-8714-d8337300f627';
+
+interface FetchGuardianNewsParams {
+  keyword?: string;
+  from?: string;
+  to?: string;
+  pageSize?: number;
+  page?: number;
+  orderBy?: 'newest' | 'oldest';
+}
+
+export const fetchGuardianApiData = async ({
+  keyword = '',
   from,
   to,
-  pageSize = 50,
   page = 1,
+  pageSize = 30,
   orderBy = 'newest',
-}: FetchGaurdianArticlesParams): Promise<GetGuardianApiResponse> => {
+}: FetchGuardianNewsParams): Promise<AxiosResponse<GetGuardianApiResponse> | null> => {
+  const queryParam = keyword ? `&q=${keyword}` : '';
+  const pageParam = `&page=${page}`;
+  const pageSizeParam = `&page-size=${pageSize}`;
+  const orderByParam = `&order-by=${orderBy}`;
+  const fromParam = from ? `&from-date=${from}` : '';
+  const toParam = to ? `&to-date=${to}` : '';
+
+  const url = `${BASE_URL}/search?api-key=${API_KEY}${queryParam}${pageParam}${pageSizeParam}${orderByParam}${fromParam}${toParam}&show-fields=thumbnail,trailText,byline`;
+
   try {
-    const response = await PublicRequest.get(`${BASE_URL}/search`, {
-      params: {
-        'api-key': API_KEY,
-        q,
-        'from-date': from,
-        'to-date': to,
-        'page-size': pageSize,
-        page,
-        'order-by': orderBy,
-      },
-    });
-    return response.data;
+    const response = await axios.get(url);
+    return response;
   } catch (error) {
-    console.error('Error fetching Guardian articles:', error);
-    throw error;
+    console.error('Error fetching Guardian news:', error);
+    return null;
   }
 };

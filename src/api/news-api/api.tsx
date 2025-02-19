@@ -1,50 +1,42 @@
-import { PublicRequest } from '@/lib';
-import {
-  FetchArticlesParams,
-  GetNewsApiResponse,
-  GetNewsApiSourceResponse,
-} from './type';
+import axios, { AxiosResponse } from 'axios';
+import { GetNewsApiResponse } from './type';
 
-const BASE_URL = 'https://newsapi.org/v2';
-const API_KEY = 'your_guardian_api_key';
+const API_KEY = '0e6477bac9e145af81df5f6fc81f2d90';
+const BASE_URL = 'https://newsapi.org/v2/top-headlines?country=us';
 
-export const getNewsSources = async (): Promise<GetNewsApiSourceResponse> => {
-  try {
-    const response = await PublicRequest.get(
-      `${BASE_URL}/top-headlines/sources?apiKey=${'Aaa'}`
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching news sources:', error);
-    throw error;
-  }
-};
+interface FetchNewsParams {
+  categories?: string[];
+  sources?: string[];
+  author?: string[];
+  page?: number;
+  pageSize?: number;
+  keyword?: string;
+}
 
-export const getArticles = async ({
-  q,
-  from,
-  to,
-  language = 'en',
-  sortBy = 'publishedAt',
-  pageSize = 50,
+export const fetchNewsApiData = async ({
+  categories = [],
+  sources = [],
+  author = [],
   page = 1,
-}: FetchArticlesParams): Promise<GetNewsApiResponse> => {
+  pageSize = 30,
+  keyword = '',
+}: FetchNewsParams): Promise<AxiosResponse<GetNewsApiResponse> | null> => {
+  const categoryParam =
+    categories.length > 0 ? `&category=${categories.join(',')}` : '';
+  const sourcesParam =
+    sources.length > 0 ? `&sources=${sources.join(',')}` : '';
+  const authorParam = author.length > 0 ? `&author=${author.join(',')}` : '';
+  const pageParam = `&page=${1}`;
+  const pageSizeParam = `&pageSize=${pageSize * page}`;
+  const queryParam = `&q=${keyword}`;
+
+  const url = `${BASE_URL}&apiKey=${API_KEY}${queryParam}${categoryParam}${sourcesParam}${authorParam}${pageParam}${pageSizeParam}`;
+
   try {
-    const response = await PublicRequest.get(`${BASE_URL}/everything`, {
-      params: {
-        apiKey: API_KEY,
-        q,
-        from,
-        to,
-        language,
-        sortBy,
-        pageSize,
-        page,
-      },
-    });
-    return response.data;
+    const response = await axios.get(url);
+    return response;
   } catch (error) {
-    console.error('Error fetching articles:', error);
-    throw error;
+    console.error('Error fetching news:', error);
+    return null;
   }
 };

@@ -1,35 +1,51 @@
-import { PublicRequest } from '@/lib';
-import { FetchArticlesParams } from '../news-api';
+import axios, { AxiosResponse } from 'axios';
 import { GetNYTApiResponse } from './type';
 
-const BASE_URL = 'https://api.nytimes.com/svc/search/v2';
-const API_KEY = 'your_guardian_api_key';
+const BASE_URL = 'https://api.nytimes.com/svc/search/v2/articlesearch.json';
+const API_KEY = 'HBshjf0Xk6chVogDuevTTPXJAMFRNap1';
 
-export const getNYTArticles = async ({
-  q,
-  from,
-  to,
-  language = 'en',
-  sortBy = 'publishedAt',
-  pageSize = 50,
+interface FetchNYTNewsParams {
+  categories?: string[];
+  sources?: string[];
+  author?: string[];
+  keyword?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export const fetchNYTApiData = async ({
+  categories = [],
+  sources = [],
+  author = [],
+  keyword = '',
   page = 1,
-}: FetchArticlesParams): Promise<GetNYTApiResponse> => {
+  pageSize = 10,
+}: FetchNYTNewsParams): Promise<AxiosResponse<GetNYTApiResponse> | null> => {
+  const fqFilters = [
+    categories.length
+      ? `news_desk:(${categories.map((c) => `"${c}"`).join(' OR ')})`
+      : '',
+    sources.length
+      ? `source:(${sources.map((s) => `"${s}"`).join(' OR ')})`
+      : '',
+    author.length ? `byline:(${author.map((a) => `"${a}"`).join(' OR ')})` : '',
+  ]
+    .filter(Boolean)
+    .join(' AND ');
+
+  const params = {
+    'api-key': API_KEY,
+    q: keyword || undefined,
+    fq: fqFilters || undefined,
+    page,
+    'page-size': pageSize,
+  };
+
   try {
-    const response = await PublicRequest.get(`${BASE_URL}/articlesearch.json`, {
-      params: {
-        'api-key': API_KEY,
-        q,
-        from,
-        to,
-        language,
-        sort: sortBy,
-        pageSize,
-        page,
-      },
-    });
-    return response.data;
+    const response = await axios.get(BASE_URL, { params });
+    return response;
   } catch (error) {
-    console.error('Error fetching NYT articles:', error);
-    throw error;
+    console.error('Error fetching NYT news:', error);
+    return null;
   }
 };
