@@ -4,6 +4,9 @@ import { Label } from '@/components/ui/label';
 import { useArticle } from '@/context/article-provider';
 import useDebounce from '@/hooks/useDebounce';
 import {
+  extractUniqueAuthors,
+  extractUniqueCategories,
+  extractUniqueSources,
   normalizeArticlesToNewsCards,
   normalizeDocToArticle,
   normalizeGuardianArticlesToNewsCards,
@@ -27,11 +30,8 @@ const Home = () => {
     setKeyword,
     date,
     setDate,
-    categories,
-    authors,
     pageSize,
     currentPage,
-    sources,
   } = useArticle();
 
   // Apply debounce to prevent rapid updates
@@ -41,8 +41,8 @@ const Home = () => {
   const debouncedSources = useDebounce(selectedSources, 500);
 
   // // Debouncing 'from' and 'to' dates separately
-  // const debouncedFrom = useDebounce(date?.from, 500);
-  // const debouncedTo = useDebounce(date?.to, 500);
+  const debouncedFrom = useDebounce(date?.from, 500);
+  const debouncedTo = useDebounce(date?.to, 500);
 
   const params = {
     categories: debouncedCategory,
@@ -51,6 +51,7 @@ const Home = () => {
     page: currentPage,
     pageSize,
     keyword: debouncedKeyword,
+    date: { from: debouncedFrom, to: debouncedTo },
   };
 
   const newsApiData = useQuery(['getNewsApiArticles', params], () =>
@@ -71,13 +72,25 @@ const Home = () => {
     );
   }, [guardianApiData.data?.data.response.results]);
 
-  const nytApiData = useQuery(['fetchGuardianApiData', params], () =>
+  const nytApiData = useQuery(['fetchNYTApiData', params], () =>
     fetchNYTApiData(params)
   );
 
   const nYTApiNormalizeData = useMemo(() => {
     return normalizeDocToArticle(nytApiData.data?.data.response.docs || []);
   }, [nytApiData.data?.data.response.docs]);
+
+  const news = useMemo(
+    () => [
+      ...nYTApiNormalizeData,
+      ...guardianApiNormalizeData,
+      ...newApiNormalizeData,
+    ],
+    [nYTApiNormalizeData, guardianApiNormalizeData, newApiNormalizeData]
+  );
+  const uniqueCategories = useMemo(() => extractUniqueCategories(news), [news]);
+  const uniqueAuthors = useMemo(() => extractUniqueAuthors(news), [news]);
+  const uniqueSources = useMemo(() => extractUniqueSources(news), [news]);
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -105,7 +118,7 @@ const Home = () => {
           <Label htmlFor="category">Category</Label>
           <MultiSelect
             id="category"
-            options={categories}
+            options={uniqueCategories}
             selected={selectedCategory}
             onChange={setSelectedCategory}
             placeholder="Select categories..."
@@ -119,7 +132,7 @@ const Home = () => {
           <Label htmlFor="author">Author</Label>
           <MultiSelect
             id="author"
-            options={authors}
+            options={uniqueAuthors}
             selected={selectedAuthor}
             onChange={setSelectedAuthor}
             placeholder="Select authors..."
@@ -133,7 +146,7 @@ const Home = () => {
           <Label htmlFor="sources">Sources</Label>
           <MultiSelect
             id="sources"
-            options={sources}
+            options={uniqueSources}
             selected={selectedSources}
             onChange={setSelectedSources}
             placeholder="Select sources..."
@@ -143,13 +156,7 @@ const Home = () => {
         </div>
       </div>
 
-      <Articles
-        news={[
-          ...nYTApiNormalizeData,
-          ...guardianApiNormalizeData,
-          ...newApiNormalizeData,
-        ]}
-      />
+      <Articles news={news} />
     </div>
   );
 };

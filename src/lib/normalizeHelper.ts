@@ -48,3 +48,24 @@ export const normalizeDocToArticle = (docs: Doc[]): Article[] => {
     web_url: doc.web_url,
   }));
 };
+
+export const extractUniqueCategories = (articles: Article[]): string[] => {
+  const categories = articles
+    .map((article) => article.category)
+    .filter((category): category is string => category !== undefined);
+  return [...new Set(categories)];
+};
+
+export const extractUniqueAuthors = (articles: Article[]): string[] => {
+  const authors = articles
+    .map((article) => article.author)
+    .filter((author): author is string => author != null);
+  return [...new Set(authors)];
+};
+
+export const extractUniqueSources = (articles: Article[]): string[] => {
+  const sources = articles
+    .map((article) => article.source)
+    .filter((source): source is string => source != null);
+  return [...new Set(sources)];
+};

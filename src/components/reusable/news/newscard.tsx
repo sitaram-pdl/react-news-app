@@ -6,6 +6,13 @@ type ArticleNews = {
   article: Article;
 };
 
+export const formatDate = (dateString: string): string =>
+  new Date(dateString).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
 const NewsCard: React.FC<ArticleNews> = ({ article }) => {
   return (
     <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-blue-100 transition-all duration-300 h-full shadow-sm hover:shadow-xl">
@@ -55,7 +62,7 @@ const NewsCard: React.FC<ArticleNews> = ({ article }) => {
           {article.date && (
             <div className="flex items-center gap-2">
               <Calendar size={16} className="text-blue-400" />
-              <span className="font-medium">{article.date}</span>
+              <span className="font-medium">{formatDate(article.date)}</span>
             </div>
           )}
         </div>

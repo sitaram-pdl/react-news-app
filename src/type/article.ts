@@ -13,9 +13,6 @@ export type Article = Partial<{
 }>;
 
 export interface ArticleContextProps {
-  categories: string[];
-  authors: string[];
-  sources: string[];
   selectedCategory: string[];
   selectedAuthor: string[];
   selectedSources: string[];
@@ -23,9 +20,6 @@ export interface ArticleContextProps {
   date: DateRange | undefined;
   currentPage: number;
   pageSize: number;
-  setCategories: React.Dispatch<React.SetStateAction<string[]>>;
-  setAuthors: React.Dispatch<React.SetStateAction<string[]>>;
-  setSources: React.Dispatch<React.SetStateAction<string[]>>;
   setSelectedCategory: React.Dispatch<React.SetStateAction<string[]>>;
   setSelectedAuthor: React.Dispatch<React.SetStateAction<string[]>>;
   setSelectedSources: React.Dispatch<React.SetStateAction<string[]>>;

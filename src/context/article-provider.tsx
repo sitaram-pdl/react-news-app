@@ -12,9 +12,6 @@ const ArticleContext = createContext<ArticleContextProps | undefined>(
 export const ArticleProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [categories, setCategories] = useState<string[]>([]);
-  const [authors, setAuthors] = useState<string[]>([]);
-  const [sources, setSources] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string[]>([]);
   const [selectedAuthor, setSelectedAuthor] = useState<string[]>([]);
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
@@ -33,9 +30,6 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({
   return (
     <ArticleContext.Provider
       value={{
-        categories,
-        authors,
-        sources,
         selectedCategory,
         selectedAuthor,
         selectedSources,
@@ -43,9 +37,6 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({
         date,
         currentPage,
         pageSize,
-        setCategories,
-        setAuthors,
-        setSources,
         setSelectedCategory,
         setSelectedAuthor,
         setSelectedSources,

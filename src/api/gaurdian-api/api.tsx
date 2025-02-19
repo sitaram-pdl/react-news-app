@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
+import { DateRange } from 'react-day-picker';
 import { GetGuardianApiResponse } from './type';
 
 const BASE_URL = 'https://content.guardianapis.com';
@@ -11,37 +12,49 @@ interface FetchGuardianNewsParams {
   pageSize?: number;
   page?: number;
   orderBy?: 'newest' | 'oldest';
+  date?: DateRange;
+  useDate?:
+    | 'published'
+    | 'first-publication'
+    | 'newspaper-edition'
+    | 'last-modified';
 }
 
 export const fetchGuardianApiData = async ({
   keyword = '',
-  from,
-  to,
   page = 1,
   pageSize = 30,
   orderBy = 'newest',
+  date,
+  useDate = 'published',
 }: FetchGuardianNewsParams): Promise<AxiosResponse<GetGuardianApiResponse> | null> => {
-  // Build query parameters dynamically based on function arguments
   const queryParams: string[] = [];
 
   if (keyword) queryParams.push(`q=${encodeURIComponent(keyword)}`);
-  if (from) queryParams.push(`from-date=${from}`);
-  if (to) queryParams.push(`to-date=${to}`);
   if (orderBy) queryParams.push(`order-by=${orderBy}`);
+  if (useDate) queryParams.push(`use-date=${useDate}`);
 
-  queryParams.push(`page=${page}`);
-  queryParams.push(`page-size=${pageSize}`);
+  const dateRangeParams = date
+    ? [
+        date.from ? `from-date=${date.from.toISOString().split('T')[0]}` : '',
+        date.to ? `to-date=${date.to.toISOString().split('T')[0]}` : '',
+      ]
+    : [];
 
-  // Ensure the parameters are joined properly
-  const queryString = queryParams.length > 0 ? `&${queryParams.join('&')}` : '';
+  const queryString = [
+    ...queryParams,
+    `page=${page}`,
+    `page-size=${pageSize}`,
+    ...dateRangeParams.filter(Boolean),
+  ].join('&');
 
-  const url = `${BASE_URL}/search?api-key=${API_KEY}${queryString}&show-fields=thumbnail,trailText,byline`;
+  const url = `${BASE_URL}/search?api-key=${API_KEY}&${queryString}&show-fields=thumbnail,trailText,byline`;
 
   try {
     const response = await axios.get(url);
     return response;
   } catch (error) {
-    console.error('Error fetching Guardian news:');
+    console.error('Error fetching Guardian news:', error);
     return null;
   }
 };
