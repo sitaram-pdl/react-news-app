@@ -23,7 +23,7 @@ interface FetchGuardianNewsParams {
 export const fetchGuardianApiData = async ({
   keyword = '',
   page = 1,
-  pageSize = 30,
+  pageSize = 20,
   orderBy = 'newest',
   date,
   useDate = 'published',

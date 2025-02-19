@@ -21,7 +21,7 @@ export const fetchNewsApiData = async ({
   sources = [],
   author = [],
   page = 1,
-  pageSize = 30,
+  pageSize = 20,
   keyword = '',
   date,
 }: FetchNewsParams): Promise<AxiosResponse<GetNewsApiResponse> | null> => {

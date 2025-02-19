@@ -1,5 +1,6 @@
 import { fetchGuardianApiData, fetchNewsApiData, fetchNYTApiData } from '@/api';
 import Articles from '@/components/reusable/news/article';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useArticle } from '@/context/article-provider';
 import useDebounce from '@/hooks/useDebounce';
@@ -32,15 +33,14 @@ const Home = () => {
     setDate,
     pageSize,
     currentPage,
+    setCurrentPage,
   } = useArticle();
 
-  // Apply debounce to prevent rapid updates
   const debouncedKeyword = useDebounce(keyword, 500);
   const debouncedCategory = useDebounce(selectedCategory, 500);
   const debouncedAuthor = useDebounce(selectedAuthor, 500);
   const debouncedSources = useDebounce(selectedSources, 500);
 
-  // // Debouncing 'from' and 'to' dates separately
   const debouncedFrom = useDebounce(date?.from, 500);
   const debouncedTo = useDebounce(date?.to, 500);
 
@@ -120,7 +120,10 @@ const Home = () => {
             id="category"
             options={uniqueCategories}
             selected={selectedCategory}
-            onChange={setSelectedCategory}
+            onChange={(e) => {
+              setSelectedCategory(e);
+              setCurrentPage(1);
+            }}
             placeholder="Select categories..."
             emptyMessage="No categories available."
             className="w-full"
@@ -134,7 +137,10 @@ const Home = () => {
             id="author"
             options={uniqueAuthors}
             selected={selectedAuthor}
-            onChange={setSelectedAuthor}
+            onChange={(e) => {
+              setSelectedAuthor(e);
+              setCurrentPage(1);
+            }}
             placeholder="Select authors..."
             emptyMessage="No authors available."
             className="w-full"
@@ -148,7 +154,10 @@ const Home = () => {
             id="sources"
             options={uniqueSources}
             selected={selectedSources}
-            onChange={setSelectedSources}
+            onChange={(e) => {
+              setSelectedSources(e);
+              setCurrentPage(1);
+            }}
             placeholder="Select sources..."
             emptyMessage="No sources available."
             className="w-full"
@@ -157,6 +166,12 @@ const Home = () => {
       </div>
 
       <Articles news={news} />
+      <Button
+        className="w-full"
+        onClick={() => setCurrentPage((prev) => prev + 1)}
+      >
+        Load more
+      </Button>
     </div>
   );
 };

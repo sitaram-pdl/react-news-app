@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
-import { GetNYTApiResponse } from './type';
 import { DateRange } from 'react-day-picker';
+import { GetNYTApiResponse } from './type';
 
 const BASE_URL = 'https://api.nytimes.com/svc/search/v2/articlesearch.json';
 const API_KEY = 'HBshjf0Xk6chVogDuevTTPXJAMFRNap1';
@@ -21,7 +21,7 @@ export const fetchNYTApiData = async ({
   author = [],
   keyword = '',
   page = 1,
-  pageSize = 10,
+  pageSize = 20,
   date,
 }: FetchNYTNewsParams): Promise<AxiosResponse<GetNYTApiResponse> | null> => {
   const fqFilters = [
