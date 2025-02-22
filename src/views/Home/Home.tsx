@@ -230,7 +230,9 @@ const Home = () => {
           />
         </div>
       </div>
+
       <Articles news={filteredNews} />
+
       {newsApiData.isFetchingNextPage ||
       guardianApiData.isFetchingNextPage ||
       nytApiData.isFetchingNextPage ? (

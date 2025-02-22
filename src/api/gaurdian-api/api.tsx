@@ -19,6 +19,7 @@ interface FetchGuardianNewsParams {
     | 'newspaper-edition'
     | 'last-modified';
 }
+
 export const fetchGuardianApiData = async ({
   keyword = '',
   page = 1,
@@ -33,18 +34,19 @@ export const fetchGuardianApiData = async ({
   if (orderBy) queryParams.push(`order-by=${orderBy}`);
   if (useDate) queryParams.push(`use-date=${useDate}`);
 
-  const dateRangeParams = date
-    ? [
-        date ? `from-date=${date.toISOString().split('T')[0]}` : '',
-        date ? `to-date=${date.toISOString().split('T')[0]}` : '',
-      ]
-    : [];
+  // Apply date reduction by 1 day (if date is provided)
+  if (date) {
+    const previousDate = new Date(date);
+    previousDate.setDate(previousDate.getDate() - 1); // Reduce 1 day
+
+    const formattedDate = previousDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    queryParams.push(`from-date=${formattedDate}`, `to-date=${formattedDate}`);
+  }
 
   const queryString = [
     ...queryParams,
     `page=${page}`,
     `page-size=${pageSize}`,
-    ...dateRangeParams.filter(Boolean),
   ].join('&');
 
   const url = `${BASE_URL}/search?api-key=${API_KEY}&${queryString}&show-fields=thumbnail,trailText,byline`;
