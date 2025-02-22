@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 import { GetGuardianApiResponse } from './type';
 
 const BASE_URL = 'https://content.guardianapis.com';
-const API_KEY = '07209d94-b995-408c-8714-d8337300f627';
+const API_KEY = 'cd39b4b1-a478-4f63-912f-2a0ee1161e86';
 
 interface FetchGuardianNewsParams {
   categories?: string[];

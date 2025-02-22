@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { GetNewsApiResponse } from './type';
 
-const API_KEY = 'd8108b576ee54eff9bfdc1a7db972166';
+const API_KEY = '1d69036b971f4426934ed0d4089c8714';
 const BASE_URL = 'https://newsapi.org/v2/everything';
 
 interface FetchNewsParams {
