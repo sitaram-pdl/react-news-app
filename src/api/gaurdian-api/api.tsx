@@ -1,25 +1,24 @@
 import axios, { AxiosResponse } from 'axios';
-import { DateRange } from 'react-day-picker';
 import { GetGuardianApiResponse } from './type';
 
 const BASE_URL = 'https://content.guardianapis.com';
 const API_KEY = '07209d94-b995-408c-8714-d8337300f627';
 
 interface FetchGuardianNewsParams {
+  categories?: string[];
   keyword?: string;
   from?: string;
   to?: string;
   pageSize?: number;
   page?: number;
   orderBy?: 'newest' | 'oldest';
-  date?: DateRange;
+  date?: Date;
   useDate?:
     | 'published'
     | 'first-publication'
     | 'newspaper-edition'
     | 'last-modified';
 }
-
 export const fetchGuardianApiData = async ({
   keyword = '',
   page = 1,
@@ -36,8 +35,8 @@ export const fetchGuardianApiData = async ({
 
   const dateRangeParams = date
     ? [
-        date.from ? `from-date=${date.from.toISOString().split('T')[0]}` : '',
-        date.to ? `to-date=${date.to.toISOString().split('T')[0]}` : '',
+        date ? `from-date=${date.toISOString().split('T')[0]}` : '',
+        date ? `to-date=${date.toISOString().split('T')[0]}` : '',
       ]
     : [];
 

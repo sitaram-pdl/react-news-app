@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ArticleContextProps } from '@/type/article';
 import React, { createContext, ReactNode, useContext, useState } from 'react';
-import { DateRange } from 'react-day-picker';
 
 const PAGE_SIZE = 50;
 
@@ -16,10 +15,7 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({
   const [selectedAuthor, setSelectedAuthor] = useState<string[]>([]);
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const [keyword, setKeyword] = useState<string>('');
-  const [date, setDate] = useState<DateRange | undefined>({
-    from: undefined,
-    to: undefined,
-  });
+  const [date, setDate] = useState<Date | undefined>();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(PAGE_SIZE);
 

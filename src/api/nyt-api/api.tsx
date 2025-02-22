@@ -1,60 +1,44 @@
 import axios, { AxiosResponse } from 'axios';
-import { DateRange } from 'react-day-picker';
 import { GetNYTApiResponse } from './type';
 
 const BASE_URL = 'https://api.nytimes.com/svc/search/v2/articlesearch.json';
 const API_KEY = 'HBshjf0Xk6chVogDuevTTPXJAMFRNap1';
 
 interface FetchNYTNewsParams {
-  categories?: string[];
-  sources?: string[];
-  author?: string[];
-  keyword?: string;
+  date?: Date;
   page?: number;
-  pageSize?: number;
-  date?: DateRange;
+  keyword?: string;
 }
 
 export const fetchNYTApiData = async ({
-  categories = [],
-  sources = [],
-  author = [],
   keyword = '',
-  page = 1,
-  pageSize = 20,
   date,
+  page = 0,
 }: FetchNYTNewsParams): Promise<AxiosResponse<GetNYTApiResponse> | null> => {
-  const fqFilters = [
-    categories.length
-      ? `news_desk:(${categories.map((c) => `"${c}"`).join(' OR ')})`
-      : '',
-    sources.length
-      ? `source:(${sources.map((s) => `"${s}"`).join(' OR ')})`
-      : '',
-    author.length ? `byline:(${author.map((a) => `"${a}"`).join(' OR ')})` : '',
-  ]
-    .filter(Boolean)
-    .join(' AND ');
-
-  const beginDate = date?.from
-    ? date.from.toISOString().split('T')[0].replace(/-/g, '')
-    : undefined;
-  const endDate = date?.to
-    ? date.to.toISOString().split('T')[0].replace(/-/g, '')
-    : undefined;
-
-  const params: { [key: string]: string | number | undefined } = {
-    'api-key': API_KEY,
-    q: keyword || undefined,
-    fq: fqFilters || undefined,
-    page,
-    'page-size': pageSize,
-    begin_date: beginDate,
-    end_date: endDate,
+  // Format date in local time to YYYYMMDD
+  const formatDate = (inputDate: Date) => {
+    const year = inputDate.getFullYear();
+    const month = String(inputDate.getMonth() + 1).padStart(2, '0');
+    const day = String(inputDate.getDate()).padStart(2, '0');
+    return `${year}${month}${day}`;
   };
 
+  const formattedDate = date ? formatDate(date) : undefined;
+
+  const queryParams = new URLSearchParams({
+    'api-key': API_KEY,
+    ...(formattedDate && {
+      begin_date: formattedDate,
+      end_date: formattedDate,
+    }),
+    page: page.toString(),
+    ...(keyword && { q: keyword }), // ✅ Fixed: Added `q` correctly inside URLSearchParams
+  });
+
+  const url = `${BASE_URL}?${queryParams.toString()}`;
+
   try {
-    const response = await axios.get(BASE_URL, { params });
+    const response = await axios.get(url);
     return response;
   } catch (error) {
     console.error('Error fetching NYT news:', error);

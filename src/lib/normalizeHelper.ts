@@ -10,7 +10,7 @@ export const normalizeArticlesToNewsCards = (
     date: article.publishedAt,
     description: article.description ?? '',
     imageUrl: article.urlToImage ?? 'https://placehold.co/600x400',
-    source: article.source?.name ?? 'Unknown Source',
+    source: 'News API',
     sourceUrl: article.url,
     web_url: article.url,
   }));
@@ -43,7 +43,7 @@ export const normalizeDocToArticle = (docs: Doc[]): Article[] => {
       doc.multimedia.length > 0
         ? 'https://static01.nyt.com/' + doc.multimedia[0].url
         : 'https://placehold.co/600x400',
-    source: doc.source ?? '',
+    source: 'New York Times',
     sourceUrl: doc.web_url,
     web_url: doc.web_url,
   }));

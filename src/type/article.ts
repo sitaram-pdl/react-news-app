@@ -1,5 +1,3 @@
-import { DateRange } from 'react-day-picker';
-
 export type Article = Partial<{
   title: string;
   author: string;
@@ -17,14 +15,14 @@ export interface ArticleContextProps {
   selectedAuthor: string[];
   selectedSources: string[];
   keyword: string;
-  date: DateRange | undefined;
+  date: Date | undefined;
   currentPage: number;
   pageSize: number;
   setSelectedCategory: React.Dispatch<React.SetStateAction<string[]>>;
   setSelectedAuthor: React.Dispatch<React.SetStateAction<string[]>>;
   setSelectedSources: React.Dispatch<React.SetStateAction<string[]>>;
   setKeyword: React.Dispatch<React.SetStateAction<string>>;
-  setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
+  setDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
   setPageSize: React.Dispatch<React.SetStateAction<number>>;
   goToNextPage: () => void;
